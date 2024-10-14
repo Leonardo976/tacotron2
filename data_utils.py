@@ -28,35 +28,35 @@ class TextMelLoader(torch.utils.data.Dataset):
         return (text, mel)
 
     def get_mel(self, filename):
-    try:
-        # Cargar el archivo de audio y la tasa de muestreo
-        audio, sampling_rate = load_wav_to_torch(filename)
-        
-        # Validar que la tasa de muestreo sea la esperada
-        if sampling_rate != self.stft.sampling_rate:
-            raise ValueError(f"Tasa de muestreo incorrecta para {filename}. "
-                             f"Esperado: {self.stft.sampling_rate}, Encontrado: {sampling_rate}")
-        
-        # Normalizar el audio
-        audio_norm = audio / self.max_wav_value
-        audio_norm = audio_norm.unsqueeze(0)
-        audio_norm = torch.autograd.Variable(audio_norm, requires_grad=False)
-        
-        # Generar el espectrograma Mel
-        melspec = self.stft.mel_spectrogram(audio_norm)
-        melspec = torch.squeeze(melspec, 0)
-        
-        return melspec
+        try:
+            # Cargar el archivo de audio y la tasa de muestreo
+            audio, sampling_rate = load_wav_to_torch(filename)
+            
+            # Validar que la tasa de muestreo sea la esperada
+            if sampling_rate != self.stft.sampling_rate:
+                raise ValueError(f"Tasa de muestreo incorrecta para {filename}. "
+                                 f"Esperado: {self.stft.sampling_rate}, Encontrado: {sampling_rate}")
+            
+            # Normalizar el audio
+            audio_norm = audio / self.max_wav_value
+            audio_norm = audio_norm.unsqueeze(0)
+            audio_norm = torch.autograd.Variable(audio_norm, requires_grad=False)
+            
+            # Generar el espectrograma Mel
+            melspec = self.stft.mel_spectrogram(audio_norm)
+            melspec = torch.squeeze(melspec, 0)
+            
+            return melspec
 
-    except FileNotFoundError:
-        print(f"Archivo no encontrado: {filename}")
-        raise
-    except IndexError as e:
-        print(f"Error de índice al procesar {filename}: {e}")
-        raise
-    except Exception as e:
-        print(f"Error al procesar el archivo {filename}: {e}")
-        raise
+        except FileNotFoundError:
+            print(f"Archivo no encontrado: {filename}")
+            raise
+        except IndexError as e:
+            print(f"Error de índice al procesar {filename}: {e}")
+            raise
+        except Exception as e:
+            print(f"Error al procesar el archivo {filename}: {e}")
+            raise
 
     def get_text(self, text):
         # Normaliza el texto; asegúrate de que text_cleaners sea adecuado para español
