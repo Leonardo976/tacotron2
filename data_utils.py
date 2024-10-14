@@ -40,6 +40,7 @@ class TextMelLoader(torch.utils.data.Dataset):
             
             # Normalizar el audio
             audio_norm = audio / self.max_wav_value
+            audio_norm = torch.clamp(audio_norm, min=-1.0, max=1.0)  # Limitar a [-1, 1]
             audio_norm = audio_norm.unsqueeze(0)
             audio_norm = torch.autograd.Variable(audio_norm, requires_grad=False)
             
@@ -104,4 +105,3 @@ class TextMelCollate():
             output_lengths[i] = mel.size(1)
 
         return text_padded, input_lengths, mel_padded, gate_padded, output_lengths
-
