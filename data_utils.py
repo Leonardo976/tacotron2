@@ -2,10 +2,10 @@ import random
 import numpy as np
 import torch
 import torch.utils.data
-
 import layers
 from utils import load_wav_to_torch, load_filepaths_and_text
 from text import text_to_sequence
+from torchaudio.transforms import Resample
 
 class TextMelLoader(torch.utils.data.Dataset):
     def __init__(self, audiopaths_and_text, hparams):
@@ -32,10 +32,11 @@ class TextMelLoader(torch.utils.data.Dataset):
             # Cargar el archivo de audio y la tasa de muestreo
             audio, sampling_rate = load_wav_to_torch(filename)
             
-            # Validar que la tasa de muestreo sea la esperada
+            # Realizar resampling si la tasa de muestreo no es la esperada
             if sampling_rate != self.stft.sampling_rate:
-                raise ValueError(f"Tasa de muestreo incorrecta para {filename}. "
-                                 f"Esperado: {self.stft.sampling_rate}, Encontrado: {sampling_rate}")
+                print(f"Resampleando {filename} de {sampling_rate}Hz a {self.stft.sampling_rate}Hz")
+                resample_transform = Resample(orig_freq=sampling_rate, new_freq=self.stft.sampling_rate)
+                audio = resample_transform(audio)
             
             # Normalizar el audio
             audio_norm = audio / self.max_wav_value
@@ -103,3 +104,4 @@ class TextMelCollate():
             output_lengths[i] = mel.size(1)
 
         return text_padded, input_lengths, mel_padded, gate_padded, output_lengths
+
